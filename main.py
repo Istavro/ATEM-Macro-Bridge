@@ -35,7 +35,7 @@ TimedOutMacro = set()
 # Receives a signal from companion to unlock the timed out macro at the end of its execution
 @app.delete("/macro-lockout/{page}/{row}/{column}")
 def MacroLockout(page:int, row:int, column:int):
-    TimedOutMacro.remove(f"{page}/{row}/{column}")
+    TimedOutMacro.discard(f"{page}/{row}/{column}")
     return
 
 # Infinite loop that polls the ATEM switcher for macros and sends POST requests to Companion when a macro is detected and not timed out.
@@ -49,7 +49,7 @@ def PollingLoop():
             continue
         if MacroUsed not in MACRO_RANGE:
             continue
-        TranslatedMacro = Config.MacroDictionary[MacroUsed]
+        TranslatedMacro = Config.MacroDictionary.get(MacroUsed)
         if TranslatedMacro and TranslatedMacro not in TimedOutMacro:
             try:
                 requests.post(f"{COMPANION_URL}/api/location/{TranslatedMacro}/press")
